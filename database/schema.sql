@@ -11,6 +11,7 @@ CREATE TABLE employees (
     joined_at DATE,
     status TEXT CHECK(status IN ('ACTIVE', 'INACTIVE')),
     performance_score INTEGER,
+    metadata JSONB DEFAULT '{}',
     sync_id TEXT, -- To track which batch updated this row
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
