@@ -14,7 +14,7 @@ The system follows a **Push-based Event-Driven Architecture**:
 graph LR
     A[Google Sheet] -->|Trigger/Manual| B(Google Apps Script)
     B -->|Clean & Validate| B
-    B -->|Batch POST (JSON)| C[Node.js API]
+    B -->|Batch POST JSON| C[Node API]
     C -->|Auth Middleware| D{Valid API Key?}
     D -- No --> E[401 Unauthorized]
     D -- Yes --> F[Bulk Upsert Controller]
