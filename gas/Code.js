@@ -3,7 +3,7 @@
  */
 
 const CONFIG = {
-  API_URL: 'http://localhost:3000/sheetsync/batch', // Replace with production URL
+  API_URL: 'https://sheetsync-szpi.onrender.com/sheetsync/batch', // Replace with production URL
   API_KEY: 'secret_12345', // Must match backend .env
   SOURCE_SHEET_NAME: 'Sheet1',
   ERRORS_SHEET_NAME: 'SheetSync_Errors',
