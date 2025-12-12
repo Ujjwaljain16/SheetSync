@@ -40,37 +40,6 @@ function runSync() {
   if (rows.length === 0) {
     Logger.log('No data to sync');
     return;
-  }
-
-  const syncId = new Date().toISOString();
-  const validRows = [];
-  const invalidRows = [];
-
-  // 1. Process Rows
-  rows.forEach((row, index) => {
-    const rowObj = mapRowToObject(row, headers);
-    const rowNum = index + 2; // 1-based + header
-
-    // 2. Clean
-    const cleaned = cleanData(rowObj);
-
-    // 3. Validate
-    const validation = validate(cleaned);
-    if (validation.isValid) {
-      // 4. Transform
-      const transformed = transform(cleaned);
-      validRows.push(transformed);
-    } else {
-      invalidRows.push({
-        row: rowNum,
-        data: JSON.stringify(cleaned),
-        error: validation.error
-      });
-    }
-  });
-
-  // 5. Send Batches
-  let totalSuccess = 0;
   let totalFailed = 0;
   let apiErrors = [];
 
@@ -108,6 +77,11 @@ function runSync() {
     success: totalSuccess,
     failed: invalidRows.length + apiErrors.length
   });
+
+  // Update Last Sync Time only if we attempted a sync
+  if (validRows.length > 0) {
+    props.setProperty('LAST_SYNC_TIME', new Date().toISOString());
+  }
 }
 
 /**
@@ -158,25 +132,41 @@ function validate(row) {
     return { isValid: false, error: 'Invalid Email Format' };
   }
 
-  if (row['Status'] && !['ACTIVE', 'INACTIVE'].includes(row['Status'])) {
-    return { isValid: false, error: 'Invalid Status' };
-  }
-
   return { isValid: true };
 }
 
 /**
  * 4. Transform Data
  */
-function transform(row) {
-  return {
-    full_name: row['Full Name'],
-    email: row['Email'],
-    phone: row['Phone'],
-    joined_at: row['Joining Date'],
-    status: row['Status'],
-    performance_score: row['Score']
-  };
+function transformData(row, headers) {
+  const transformed = {};
+  
+  // Map standard fields
+  transformed.full_name = row[headers.indexOf('Full Name')];
+  transformed.email = row[headers.indexOf('Email')];
+  transformed.phone = row[headers.indexOf('Phone')];
+  
+  // Handle Date
+  const dateIndex = headers.indexOf('Joined Date');
+  if (dateIndex > -1 && row[dateIndex] instanceof Date) {
+    transformed.joined_at = row[dateIndex].toISOString().split('T')[0];
+  } else {
+    transformed.joined_at = null;
+  }
+  
+  transformed.status = row[headers.indexOf('Status')];
+  transformed.performance_score = row[headers.indexOf('Score')];
+
+  // Capture ALL other columns as dynamic fields
+  headers.forEach((header, index) => {
+    const standardHeaders = ['Full Name', 'Email', 'Phone', 'Joined Date', 'Status', 'Score'];
+    if (!standardHeaders.includes(header)) {
+      const key = header.toLowerCase().replace(/\s+/g, '_');
+      transformed[key] = row[index];
+    }
+  });
+
+  return transformed;
 }
 
 /**
@@ -270,4 +260,5 @@ function scheduleSync() {
     .timeBased()
     .everyHours(1)
     .create();
+}
 }
