@@ -138,4 +138,5 @@ Syncs a batch of rows to the database.
   ]
 }
 ```
--Ujjwal Jain 
+-Ujjwal Jain
+
