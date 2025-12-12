@@ -12,14 +12,14 @@ The system follows a **Push-based Event-Driven Architecture**:
 
 ```mermaid
 graph LR
-    A[Google Sheet] -->|Trigger/Manual| B(Google Apps Script)
+    A["Google Sheet"] -->|Trigger/Manual| B["Google Apps Script"]
     B -->|Clean & Validate| B
-    B -->|Batch POST (JSON)| C[Node.js API]
-    C -->|Auth Middleware| D{Valid API Key?}
-    D -- No --> E[401 Unauthorized]
-    D -- Yes --> F[Bulk Upsert Controller]
-    F -->|UNNEST + ON CONFLICT| G[(PostgreSQL DB)]
-    F -->|Webhook Alert| H[Discord/Slack]
+    B -->|Batch POST (JSON)| C{"Node.js API"}
+    C -->|Auth Middleware| D{"Valid API Key?"}
+    D -- No --> E["401 Unauthorized"]
+    D -- Yes --> F["Bulk Upsert Controller"]
+    F -->|UNNEST + ON CONFLICT| G[("PostgreSQL DB")]
+    F -->|Webhook Alert| H["Discord/Slack"]
     G -->|Ack| F
     F -->|200 OK| B
     B -->|Log Result| A
@@ -138,6 +138,4 @@ Syncs a batch of rows to the database.
   ]
 }
 ```
-
-## 📄 License
-MIT
+-Ujjwal Jain 
