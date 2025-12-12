@@ -138,6 +138,4 @@ Syncs a batch of rows to the database.
   ]
 }
 ```
-
-## 📄 License
-MIT
+Ujjwal Jain
