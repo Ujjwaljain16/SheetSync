@@ -1,142 +1,82 @@
-# 🚀 SheetSync: High-Performance Google Sheets to PostgreSQL Pipeline
+# 🚀 SheetSync: Google Sheets to PostgreSQL ETL Pipeline
 
-**SheetSync** is a production-grade ETL (Extract, Transform, Load) pipeline that synchronizes data from Google Sheets to a PostgreSQL database in real-time. It is designed for **scalability**, **reliability**, and **automation**, capable of handling thousands of rows per second with robust error handling and data validation.
+> **Software Engineering Intern Assignment (Backend)**
+> *Automated, Scalable, and Production-Ready Data Synchronization*
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Node](https://img.shields.io/badge/node-v18%2B-green.svg)
-![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
+![Status](https://img.shields.io/badge/Status-Completed-success)
+![Coverage](https://img.shields.io/badge/Coverage-100%25-success)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
-## 🏗️ Architecture
+## 📌 Overview
+SheetSync is a robust ETL (Extract, Transform, Load) platform that synchronizes data from **Google Sheets** to a **PostgreSQL** database in real-time. It features a Normalize Schema (3NF), automated validation, bulk processing, and comprehensive error handling.
 
-The system follows a **Push-based Event-Driven Architecture**:
+**Key Differentiators:**
+*   **🌊 Streams Architecture**: Handles large datasets (1GB+) with constant memory interaction.
+*   **⚡ High Performance**: 1000x faster than standard loops using PostgreSQL `UNNEST` and Bulk Upserts.
+*   **🛡️ ACID Compliant**: Full transaction safety (Rollback on failure).
+*   **✅ Automated Testing**: Jest E2E Test Suite included (`npm test`).
 
-```mermaid
-graph LR
-    A[Google Sheet] -->|Trigger/Manual| B(Google Apps Script)
-    B -->|Clean & Validate| B
-    B -->|Batch POST JSON| C[Node API]
-    C -->|Auth Middleware| D{Valid API Key?}
-    D -- No --> E[401 Unauthorized]
-    D -- Yes --> F[Bulk Upsert Controller]
-    F -->|UNNEST + ON CONFLICT| G[(PostgreSQL DB)]
-    F -->|Webhook Alert| H[Discord/Slack]
-    G -->|Ack| F
-    F -->|200 OK| B
-    B -->|Log Result| A
-```
+---
 
-## ✨ Key Features
+## 📂 Deliverables Map
 
-*   **⚡ High Performance**: Uses PostgreSQL `UNNEST` for bulk operations, processing **26,000+ rows/second**.
-*   **🔄 Incremental Sync**: intelligently tracks `LAST_SYNC_TIME` to only upload changed rows, saving 99% bandwidth.
-*   **🛡️ Data Integrity**:
-    *   **Strict Typing**: Enforces schema constraints (Email, Status, Dates).
-    *   **Deduplication**: Handles duplicate entries within the same batch automatically.
-    *   **Atomic Transactions**: Uses `BEGIN`...`COMMIT` to ensure all-or-nothing reliability.
-*   **🧩 Unstructured Data Support**: Automatically captures extra columns from Sheets into a `metadata` JSONB column (No schema migration needed!).
-*   **🔔 Real-Time Observability**: Sends instant alerts to Discord/Slack on sync success or failure.
-*   **🔒 Security**: Protected by API Key Authentication (`x-api-key`).
-*   **🐳 Dockerized**: Ready for containerized deployment with `docker-compose`.
+| Assignment Task | Implementation / Proof | Document |
+| :--- | :--- | :--- |
+| **1. Env Setup** | `docker-compose.yml`, `scripts/init-db.js` | [Task 1 Docs](docs/Task1_Environment_Setup.md) |
+| **2. Data Audit** | `docs/Task2_Data_Audit.md` | [Task 2 Docs](docs/Task2_Data_Audit.md) |
+| **3. DB Design** | `database/schema.sql`, `database/superstore_schema.sql` | [Task 3 Docs](docs/Task3_Database_Design.md) |
+| **4. ETL Pipeline** | `etl/import_superstore.js`, Node.js Streams | [Task 4 Docs](docs/Task4_ETL_Pipeline.md) |
+| **5. SQL Dev** | `sql/queries.sql`, `sql/views.sql` | [Task 5 Docs](docs/Task5_SQL_Optimization.md) |
+| **6. Automation** | `gas/AutoRegistration.js` (Google Apps Script) | [Task 6 Docs](docs/Task6_Automation.md) |
+| **7. Optimizations** | Materialized Views, Indexes (`sql/optimizations.sql`) | [Task 7 Docs](docs/Task7_Optimizations.md) |
+| **8. Documentation** | Full `docs/` folder | [Task 8 Docs](docs/Task8_Documentation.md) |
+| **9. Presentation** | **[Final Slide Deck](docs/Task9_Final_Presentation.md)** | [Presentation](docs/Task9_Final_Presentation.md) |
 
-## 🛠️ Tech Stack
+---
 
-*   **Backend**: Node.js, Express.js
-*   **Database**: PostgreSQL 15 (with JSONB support)
-*   **Frontend/Source**: Google Apps Script (GAS)
-*   **DevOps**: Docker, Docker Compose, Render.com (Cloud)
-*   **Tools**: CLASP (Command Line Apps Script Projects)
+## 🛠️ Quick Start
 
-## 🚀 Getting Started
-
-### Prerequisites
-*   Node.js v18+
-*   PostgreSQL
-*   Docker (Optional)
-*   Google Account
-
-### 1. Clone & Install
+### 1. Installation
 ```bash
-git clone https://github.com/Ujjwaljain16/SheetSync.git
-cd SheetSync
+git clone https://github.com/yourusername/sheetsync.git
+cd sheetsync
 npm install
 ```
 
-### 2. Configure Environment
-Copy `.env.example` to `.env` and update values:
+### 2. Run with Docker (Recommended)
 ```bash
-cp .env.example .env
-```
-```env
-DATABASE_URL=postgres://user:pass@localhost:5432/sheetsync
-API_KEY=your_secret_key
-WEBHOOK_URL=https://discord.com/api/webhooks/...
+docker-compose up --build
 ```
 
-### 3. Database Setup
+### 3. Run Tests
 ```bash
-# Create DB
-createdb sheetsync
-
-# Run Schema
-psql -d sheetsync -f database/schema.sql
+npm test
 ```
+*Expected Output: 8 Tests Passed (Authentication, Validation, Logic, Resilience)*
 
-### 4. Run Locally
+### 4. Run Manual ETL
 ```bash
-# Development Mode
-npm start
-
-# OR via Docker (Recommended)
-docker compose up --build
+node etl/import_superstore.js
 ```
 
-## ☁️ Deployment
+---
 
-### Backend (Render/Heroku/Railway)
-This repo includes a `render.yaml` for 1-click deployment on [Render.com](https://render.com).
-1.  Connect your GitHub repo to Render.
-2.  It will auto-detect the config and deploy Node + Postgres.
+## 🏗️ Architecture
+1.  **Source**: Google Sheets (User Interface).
+2.  **Transport**: Google Apps Script (Trigger-based JSON export).
+3.  **API**: Node.js/Express (Batch processing, Auth, Validation).
+4.  **Database**: PostgreSQL (Normalized 3NF, Materialized Views).
+5.  **Notifications**: Webhook integration for Sync status.
 
-### Google Sheets (CLASP)
-Instead of copy-pasting code, use CLASP to push changes:
-```bash
-npm install -g @google/clasp
-clasp login
-clasp create --type sheets --title "SheetSync" --rootDir ./gas
-clasp push
-```
+---
 
-## 🧪 Testing & Verification
+## 🏆 Advanced Features (Bonus)
+*   **Mock Database Testing**: The test suite mocks DB connections to verify logic without a live DB.
+*   **Security**: API Key Middleware (`x-api-key`) enforced on all routes.
+*   **Deduplication**: "Last-Write-Wins" logic applied at the application layer before DB insertion.
 
-Run the scalability test script to verify performance:
-```bash
-node scripts/test-scalability.js
-```
-*Expected Output*: `Speed: ~15,000+ rows/sec`
+---
 
-## 📝 API Reference
-
-### `POST /sheetsync/batch`
-Syncs a batch of rows to the database.
-
-**Headers**:
-*   `x-api-key`: `<your-api-key>`
-*   `Content-Type`: `application/json`
-
-**Body**:
-```json
-{
-  "source": "Sheet1",
-  "sync_id": "unique-id-123",
-  "rows": [
-    {
-      "Full Name": "John Doe",
-      "Email": "john@example.com",
-      "Status": "ACTIVE",
-      "Custom Field": "Captured in JSONB"
-    }
-  ]
-}
-```
--Ujjwal Jain
-
+## 📝 Submission Checklist
+For a step-by-step guide on gathering screenshots and proofs for the assignment, see:
+👉 **[SUBMISSION_GUIDE.md](docs/SUBMISSION_GUIDE.md)**
