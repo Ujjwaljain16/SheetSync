@@ -622,7 +622,20 @@ The request data failed validation. Check the response body:
 
 ### Deployment Options
 
-#### Option 1: Railway (Recommended for NeonDB)
+#### Option 1: Render (Recommended - Infrastructure as Code)
+Since this project includes a `render.yaml` file, deployment is automated:
+1.  Link your GitHub repo to verified [Render Account](https://render.com).
+2.  Click **"New +"** -> **"Blueprint"**.
+3.  Select this repository.
+4.  Render will auto-detect `render.yaml` and provision:
+    *   **PostgreSQL Database** (Free Tier)
+    *   **Node.js Web Service**
+5.  **Environment Variables**:
+    *   `DATABASE_URL`: Auto-linked.
+    *   `API_KEY`: Auto-generated.
+    *   `NODE_ENV`: Set to `production` (in `render.yaml`).
+
+#### Option 2: Railway (Alternative for NeonDB)
 ```bash
 # Install Railway CLI
 npm i -g @railway/cli
