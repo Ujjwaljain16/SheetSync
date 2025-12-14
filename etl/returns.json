@@ -1,0 +1,37 @@
+[
+    {
+        "Order ID": "CA-2016-152156",
+        "Returned": "Yes",
+        "Reason": "Defective"
+    },
+    {
+        "Order ID": "CA-2016-152156",
+        "Returned": "Yes",
+        "Reason": "Defective"
+    },
+    {
+        "Order ID": "CA-2016-138688",
+        "Returned": "Yes",
+        "Reason": null
+    },
+    {
+        "Order ID": "US-2015-108966",
+        "Returned": "Yes",
+        "Reason": "Wrong Item"
+    },
+    {
+        "Order ID": "CA-2016-115812",
+        "Returned": "Yes",
+        "Reason": "Not Needed"
+    },
+    {
+        "Order ID": "CA-2016-115812",
+        "Returned": "Yes",
+        "Reason": "Not Needed"
+    },
+    {
+        "Order ID": "INVALID-ID-000",
+        "Returned": "Yes",
+        "Reason": "Scam"
+    }
+]
