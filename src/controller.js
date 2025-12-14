@@ -106,7 +106,11 @@ const processBatch = async (req, res) => {
         // Since we are in a Transaction (BEGIN/COMMIT), this is still ACID compliant and efficient enough for batch sizes < 100.
         let successCount = 0;
         
-        for (const index of validRowsIndices) {
+        // Batch Insert using Loop
+        // Fix: Use generic index i relative to the arrays we just built, 
+        // NOT the original row indices (which may be sparse/discontinuous)
+        
+        for (let i = 0; i < emails.length; i++) {
             const rowQuery = `
                 INSERT INTO employees (
                     full_name, email, phone, joined_at, status, 
@@ -127,14 +131,14 @@ const processBatch = async (req, res) => {
             `;
 
             const rowValues = [
-                full_names[index], 
-                emails[index], 
-                phones[index], 
-                joined_ats[index], 
-                statuses[index], 
-                scores[index], 
-                metadatas[index], // This is a JSON string, PG driver handles string -> jsonb cast easily
-                sync_ids[index]
+                full_names[i], 
+                emails[i], 
+                phones[i], 
+                joined_ats[i], 
+                statuses[i], 
+                scores[i], 
+                metadatas[i], 
+                sync_ids[i]
             ];
 
             await client.query(rowQuery, rowValues);
