@@ -2,7 +2,24 @@ const db = require('./db');
 
 
 
+const util = require('util');
+const setTimeoutPromise = util.promisify(setTimeout);
+
+const connectWithRetry = async (retries = 3, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const client = await db.pool.connect();
+            return client;
+        } catch (err) {
+            console.warn(`[WARN] DB Connection attempt ${i + 1} failed: ${err.message}. Retrying in ${delay}ms...`);
+            if (i === retries - 1) throw err;
+            await setTimeoutPromise(delay);
+        }
+    }
+};
+
 const processBatch = async (req, res) => {
+    console.log('[DEBUG] processBatch called. Body rows:', req.body.rows?.length);
     const { source, sync_id, rows } = req.body;
 
     if (!rows || !Array.isArray(rows)) {
@@ -13,7 +30,7 @@ const processBatch = async (req, res) => {
         return res.json({ success: true, rows_received: 0, rows_success: 0, rows_failed: [] });
     }
 
-    const client = await db.pool.connect();
+    let client;
     const results = {
         success: true,
         rows_received: rows.length,
@@ -22,6 +39,7 @@ const processBatch = async (req, res) => {
     };
 
     try {
+        client = await connectWithRetry();
         await client.query('BEGIN');
 
         // Prepare arrays for Bulk Insert (UNNEST)
@@ -54,7 +72,7 @@ const processBatch = async (req, res) => {
              uniqueRowsMap.set(row.email, { row, index });
         });
 
-        // 2. Process unique rows
+        // 2. Processing unique rows
         uniqueRowsMap.forEach(({ row, index }) => {
             // Basic Backend Validation
             if (!row.email || !row.full_name) {
@@ -84,20 +102,17 @@ const processBatch = async (req, res) => {
             validRowsIndices.push(index);
         });
 
-        if (full_names.length > 0) {
-            const query = `
-                INSERT INTO employees (full_name, email, phone, joined_at, status, performance_score, metadata, sync_id, updated_at)
-                SELECT * FROM UNNEST(
-                    $1::text[], 
-                    $2::text[], 
-                    $3::text[], 
-                    $4::date[], 
-                    $5::text[], 
-                    $6::int[], 
-                    $7::jsonb[],
-                    $8::text[],
-                    ARRAY_FILL(NOW(), ARRAY[CARDINALITY($1::text[])])
+        // Batch Insert using Loop (Simpler/Safer than UNNEST for avoiding driver/serialization bugs)
+        // Since we are in a Transaction (BEGIN/COMMIT), this is still ACID compliant and efficient enough for batch sizes < 100.
+        let successCount = 0;
+        
+        for (const index of validRowsIndices) {
+            const rowQuery = `
+                INSERT INTO employees (
+                    full_name, email, phone, joined_at, status, 
+                    performance_score, metadata, sync_id, updated_at
                 )
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
                 ON CONFLICT (email) 
                 DO UPDATE SET
                     full_name = EXCLUDED.full_name,
@@ -105,39 +120,50 @@ const processBatch = async (req, res) => {
                     joined_at = EXCLUDED.joined_at,
                     status = EXCLUDED.status,
                     performance_score = EXCLUDED.performance_score,
-                    metadata = employees.metadata || EXCLUDED.metadata, -- Merge new metadata with existing
+                    metadata = employees.metadata || EXCLUDED.metadata,
                     sync_id = EXCLUDED.sync_id,
                     updated_at = NOW()
                 RETURNING email;
             `;
 
-            const values = [full_names, emails, phones, joined_ats, statuses, scores, metadatas, sync_ids];
-            
-            const result = await client.query(query, values);
-            results.rows_success = result.rowCount;
+            const rowValues = [
+                full_names[index], 
+                emails[index], 
+                phones[index], 
+                joined_ats[index], 
+                statuses[index], 
+                scores[index], 
+                metadatas[index], // This is a JSON string, PG driver handles string -> jsonb cast easily
+                sync_ids[index]
+            ];
+
+            await client.query(rowQuery, rowValues);
+            successCount++;
         }
+        
+        results.rows_success = successCount;
 
         await client.query('COMMIT');
         
         // Send Success Notification
         if (results.rows_success > 0) {
             const { sendNotification } = require('./services/notification');
-            sendNotification(`Sync Success! Processed ${results.rows_received} rows. Inserted/Updated: ${results.rows_success} Failed: ${results.rows_failed.length}`, 'success');
+            await sendNotification(`Sync Success! Processed ${results.rows_received} rows. Inserted/Updated: ${results.rows_success} Failed: ${results.rows_failed.length}`, 'success');
         }
         
         res.json(results);
 
     } catch (error) {
-        await client.query('ROLLBACK');
+        if (client) await client.query('ROLLBACK');
         console.error('Batch processing error:', error);
         
         // Send Error Notification
         const { sendNotification } = require('./services/notification');
-        sendNotification(`Sync Critical Failure: ${error.message}`, 'error');
+        await sendNotification(`Sync Critical Failure: ${error.message}`, 'error');
 
         res.status(500).json({ error: 'Internal Server Error: ' + error.message });
     } finally {
-        client.release();
+        if (client) client.release();
     }
 };
 

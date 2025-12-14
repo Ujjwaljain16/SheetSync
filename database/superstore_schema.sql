@@ -3,6 +3,12 @@
 -- =============================================
 
 -- 1. Locations Table (Normalized to remove redundancy)
+DROP TABLE IF EXISTS order_items CASCADE;
+DROP TABLE IF EXISTS orders CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS locations CASCADE;
+
 CREATE TABLE locations (
     location_id SERIAL PRIMARY KEY,
     city VARCHAR(100),
@@ -16,7 +22,7 @@ CREATE TABLE locations (
 CREATE TABLE customers (
     customer_id VARCHAR(50) PRIMARY KEY, -- Using Source ID (e.g., AB-10015)
     customer_name VARCHAR(100) NOT NULL,
-    segment VARCHAR(50) CHECK (segment IN ('Consumer', 'Corporate', 'Home Office'))
+    segment VARCHAR(50) CHECK (segment IN ('Consumer', 'Corporate', 'Home Office', 'Small Business'))
 );
 
 -- 3. Products Table

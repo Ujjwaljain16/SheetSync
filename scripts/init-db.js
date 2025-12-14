@@ -13,14 +13,17 @@ async function initDB() {
         console.log("Connected to database...");
 
         // Read Schema Files
-        const schemaPath = path.join(__dirname, '../database/superstore_schema.sql');
+        const superstoreSchemaPath = path.join(__dirname, '../database/superstore_schema.sql');
+        const employeesSchemaPath = path.join(__dirname, '../database/schema.sql'); // Create employees table
         const seedPath = path.join(__dirname, '../database/seed.sql');
 
-        const schemaSql = fs.readFileSync(schemaPath, 'utf8');
+        const superstoreSql = fs.readFileSync(superstoreSchemaPath, 'utf8');
+        const employeesSql = fs.readFileSync(employeesSchemaPath, 'utf8');
         const seedSql = fs.readFileSync(seedPath, 'utf8');
 
         console.log("Applying Schema...");
-        await client.query(schemaSql);
+        await client.query(superstoreSql);
+        await client.query(employeesSql); // Apply employees schema
         console.log("Schema Applied.");
 
         console.log("Seeding Data...");

@@ -1,4 +1,4 @@
--- Enable UUID extension if needed (optional, using SERIAL for ID as per plan)
+-- Enable UUID extension if needed (optional, using SERIAL for ID)
 -- CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 DROP TABLE IF EXISTS employees;
