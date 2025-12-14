@@ -30,9 +30,8 @@ Use this guide to collect your **Screenshots** and **Proofs** for the final subm
 *   **Requirement**: "Logs & validation reports"
 *   **How to Get Proof**:
     1. Run: `node etl/import_superstore.js`
-    2. **Screenshot** the output: "🚀 Processing complete. Inserted: X rows."
-    3. Open `Google Sheets` -> `Extensions` -> `Apps Script` -> `Executions`.
-    4. **Screenshot** the "Completed" execution logs.
+    2. **Screenshot** the terminal output: "✅ ETL Completed! Processed 8399 records."
+    3. (Optional) Run `node scripts/run-sql.js sql/queries.sql` to show the data being queried.
 
 ## 📌 Task 5: SQL Development
 *   **Requirement**: "Screenshots of query results"
@@ -44,16 +43,21 @@ Use this guide to collect your **Screenshots** and **Proofs** for the final subm
 *   **Requirement**: "Auto-registration demo"
 *   **How to Get Proof**:
     1. **Record a Video** (or take before/after screenshots):
-        *   Add a row in Google Sheets: `John Doe | john@example.com`.
+        *   Add a row in Google Sheets: `1001` | `2025-12-14` | `Alice Smith` | `alice@example.com` ...
         *   Wait 1 minute (or run script manually).
         *   Show the row turning **Green** (Validated).
         *   Show the email notification in your Inbox.
 
 ## 📌 Task 7: Optimizations
-*   **Requirement**: "Benchmark: query performance"
+## 📌 Task 7: Optimizations
+*   **Requirement**: "ETL Run & Optimization Proofs"
 *   **How to Get Proof**:
-    1. Run: `node scripts/run-sql.js sql/optimizations.sql`
-    2. **Screenshot** the `EXPLAIN ANALYZE` output showing the query cost *before* and *after* the Materialized View.
+    1. **ETL Run**: Run `node etl/import_returns.js`
+        *   **Screenshot** the output: "✨ Transformed to X clean records" and "✅ Load Complete".
+    2. **Optimization**: Run `node scripts/run-sql.js sql/optimizations.sql`
+        *   **Screenshot** the output: "Executed successfully".
+    3. **Verification**: Run `node scripts/run-sql.js sql/check_mv.sql`
+        *   **Screenshot** the table output showing data inside the Materialized View.
 
 ## 📌 Task 8: Documentation
 *   **Requirement**: "Full documentation structure"

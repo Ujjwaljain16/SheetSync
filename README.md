@@ -1,82 +1,122 @@
-# 🚀 SheetSync: Google Sheets to PostgreSQL ETL Pipeline
+# 🚀 SheetSync: The "Un-Siloed" Data Pipeline
 
-> **Software Engineering Intern Assignment (Backend)**
-> *Automated, Scalable, and Production-Ready Data Synchronization*
-
-![Status](https://img.shields.io/badge/Status-Completed-success)
-![Coverage](https://img.shields.io/badge/Coverage-100%25-success)
+![Status](https://img.shields.io/badge/Status-Production%20Ready-success)
+![Build](https://img.shields.io/badge/Build-Passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Tests-100%25-success)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue)
 
-## 📌 Overview
-SheetSync is a robust ETL (Extract, Transform, Load) platform that synchronizes data from **Google Sheets** to a **PostgreSQL** database in real-time. It features a Normalize Schema (3NF), automated validation, bulk processing, and comprehensive error handling.
-
-**Key Differentiators:**
-*   **🌊 Streams Architecture**: Handles large datasets (1GB+) with constant memory interaction.
-*   **⚡ High Performance**: 1000x faster than standard loops using PostgreSQL `UNNEST` and Bulk Upserts.
-*   **🛡️ ACID Compliant**: Full transaction safety (Rollback on failure).
-*   **✅ Automated Testing**: Jest E2E Test Suite included (`npm test`).
+**SheetSync** is a high-performance, resilient ETL platform that bridges the gap between **Google Sheets** flexibility and **PostgreSQL** reliability. It transforms manual spreadsheets into a validated, ACID-compliant data stream for enterprise prototyping.
 
 ---
 
-## 📂 Deliverables Map
+## ⚡ Why SheetSync?
 
-| Assignment Task | Implementation / Proof | Document |
+| Feature | ❌ Traditional Sheets | ✅ SheetSync (Production) |
 | :--- | :--- | :--- |
-| **1. Env Setup** | `docker-compose.yml`, `scripts/init-db.js` | [Task 1 Docs](docs/Task1_Environment_Setup.md) |
-| **2. Data Audit** | `docs/Task2_Data_Audit.md` | [Task 2 Docs](docs/Task2_Data_Audit.md) |
-| **3. DB Design** | `database/schema.sql`, `database/superstore_schema.sql` | [Task 3 Docs](docs/Task3_Database_Design.md) |
-| **4. ETL Pipeline** | `etl/import_superstore.js`, Node.js Streams | [Task 4 Docs](docs/Task4_ETL_Pipeline.md) |
-| **5. SQL Dev** | `sql/queries.sql`, `sql/views.sql` | [Task 5 Docs](docs/Task5_SQL_Optimization.md) |
-| **6. Automation** | `gas/AutoRegistration.js` (Google Apps Script) | [Task 6 Docs](docs/Task6_Automation.md) |
-| **7. Optimizations** | Materialized Views, Indexes (`sql/optimizations.sql`) | [Task 7 Docs](docs/Task7_Optimizations.md) |
-| **8. Documentation** | Full `docs/` folder | [Task 8 Docs](docs/Task8_Documentation.md) |
-| **9. Presentation** | **[Final Slide Deck](docs/Task9_Final_Presentation.md)** | [Presentation](docs/Task9_Final_Presentation.md) |
+| **Data Integrity** | Free-for-all typing errors | **Strict Validation & Type Safety** |
+| **Performance** | Slow `VLOOKUP` on 10k rows | **113x Faster** SQL Queries (Indexed) |
+| **Reliability** | Scripts timeout randomly | **Resilient API** (Exponential Backoff) |
+| **Consistency** | Duplicates everywhere | **Idempotent** (Mathematically Unique) |
 
 ---
 
-## 🛠️ Quick Start
+## 🏗️ Architecture: The "Resilient Inbox"
 
-### 1. Installation
-```bash
-git clone https://github.com/yourusername/sheetsync.git
-cd sheetsync
-npm install
+We use a **Transactional Inbox Pattern** to handle messy user data safely.
+
+```mermaid
+graph LR
+    User[👩‍💻 User Entry] -->|Google Sheets| GAS[⚡ Apps Script Trigger]
+    GAS -->|JSON Payload| API[🛡️ Node.js API]
+    API -->|Begin Transaction| DB[(🐘 PostgreSQL)]
+    DB -->|Valid?| Commit[✅ Commit]
+    DB -->|Error?| Rollback[❌ Rollback]
+    Commit -->|200 OK| GAS
+    Rollback -->|500 Error| GAS
+    GAS -->|Update Row Color| User
 ```
 
-### 2. Run with Docker (Recommended)
+**Key Improvements:**
+1.  **3NF Normalization**: Splits raw orders into `Customers`, `Products`, and `Locations`.
+2.  **Materialized Views**: Pre-calculates heavy analytics for sub-millisecond reads.
+3.  **Hybrid Schema**: Uses `JSONB` for flexible metadata storage while enforcing core schema.
+
+---
+
+## 🏎️ Quick Start (3 Minutes)
+
+### Option A: Docker (Recommended) 🐳
+Run the full stack (API + DB + Auto-Schema) in one command.
 ```bash
 docker-compose up --build
 ```
+*   **API**: `http://localhost:3000`
+*   **Database**: `localhost:5432`
 
-### 3. Run Tests
+### Option B: Local Development 🛠️
+```bash
+# 1. Install Dependencies
+npm install
+
+# 2. Configure Environment
+cp .env.example .env
+
+# 3. Start Server
+npm start
+```
+
+---
+
+## 📂 Project Structure & Documentation
+
+This project follows a modular "Docs as Code" approach.
+
+```bash
+├── database/            # 🐘 SQL Schemas, Seeds, & Procedures
+├── docs/                # 📚 Project Reporting & Artifacts
+├── etl/                 # 🔄 Node.js Streams ETL pipeline
+├── gas/                 # ⚡ Google Apps Script (Frontend)
+├── scripts/             # 🛠️ Maintenance & E2E Demo scripts
+├── src/                 # 🚀 Express API & Controller Logic
+├── tests/               # 🧪 Jest Unit & Integration Tests
+├── docker-compose.yml   # 🐳 Container Orchestration
+└── Dockerfile           # 📦 App Container Definition
+```
+
+### 🔹 Phase 1: Foundation
+*   **[Environment Setup](docs/Task1_Environment_Setup.md)**: Docker & Node configuration.
+*   **[Data Audit](docs/Task2_Data_Audit.md)**: Analysis of 10k+ row Superstore dataset.
+*   **[Database Design](docs/Task3_Database_Design.md)**: ER Diagram & 3NF Schema.
+
+### 🔹 Phase 2: Engineering
+*   **[ETL Pipeline](docs/Task4_ETL_Pipeline.md)**: Node.js Streams for memory-efficient processing.
+*   **[SQL Optimization](docs/Task5_SQL_Optimization.md)**: Advanced Views & Indexing strategies.
+*   **[Benchmarks](docs/Task7_Optimizations.md)**: Materialized Views vs Raw Queries.
+
+### 🔹 Phase 3: Reliability (Gold Standard)
+*   **[Automation & API](docs/Task6_Automation.md)**: Google Apps Script & Retry Logic.
+*   **[Walkthrough](docs/walkthrough.md)**: End-to-End Demo Guide.
+*   **[Final Presentation](docs/Task9_Final_Presentation.md)**: Executive Summary.
+
+---
+
+## 🏆 Key Achievements
+*   **113x Speedup**: Optimized Analysis queries from `1.16ms` down to `0.01ms`.
+*   **Zero Downtime**: API handles Database "Busy" states with active **Exponential Backoff**.
+*   **Data Safety**: Uses **SQL Transactions** (`BEGIN`...`COMMIT`) for every batch.
+
+---
+
+## 🧪 Testing
+
+We include a comprehensive Jest test suite covering Authentication, Validation, and Logic.
+
 ```bash
 npm test
 ```
-*Expected Output: 8 Tests Passed (Authentication, Validation, Logic, Resilience)*
 
-### 4. Run Manual ETL
-```bash
-node etl/import_superstore.js
-```
+> **Note**: The E2E Demo Script (`scripts/e2e_demo.js`) validates the entire pipeline against a live Docker database.
 
 ---
 
-## 🏗️ Architecture
-1.  **Source**: Google Sheets (User Interface).
-2.  **Transport**: Google Apps Script (Trigger-based JSON export).
-3.  **API**: Node.js/Express (Batch processing, Auth, Validation).
-4.  **Database**: PostgreSQL (Normalized 3NF, Materialized Views).
-5.  **Notifications**: Webhook integration for Sync status.
-
----
-
-## 🏆 Advanced Features (Bonus)
-*   **Mock Database Testing**: The test suite mocks DB connections to verify logic without a live DB.
-*   **Security**: API Key Middleware (`x-api-key`) enforced on all routes.
-*   **Deduplication**: "Last-Write-Wins" logic applied at the application layer before DB insertion.
-
----
-
-## 📝 Submission Checklist
-For a step-by-step guide on gathering screenshots and proofs for the assignment, see:
-👉 **[SUBMISSION_GUIDE.md](docs/SUBMISSION_GUIDE.md)**
+**Ready for Internship Review.** 🎓

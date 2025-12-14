@@ -1,9 +1,4 @@
 # 📘 SheetSync Project Documentation
-
-**Project**: SheetSync (Google Sheets to PostgreSQL ETL)
-**Author**: Ujjwal Jain
-**Date**: December 2025
-
 ---
 
 ## 📂 Documentation Index
@@ -68,12 +63,3 @@ This project is documented in a modular fashion, with each task having its own d
 
 ---
 
-## 📊 Summary of Deliverables
-
-| Deliverable | Status | Location |
-| :--- | :--- | :--- |
-| **ER Diagram** | ✅ Done | [Task 3](Task3_Database_Design.md) |
-| **ETL Pipeline** | ✅ Done | [Task 4](Task4_ETL_Pipeline.md) |
-| **SQL Reports** | ✅ Done | [Task 5](Task5_SQL_Optimization.md) |
-| **Automation** | ✅ Done | [Task 6](Task6_Automation.md) |
-| **Optimizations** | ✅ Done | [Task 7](Task7_Optimizations.md) |
