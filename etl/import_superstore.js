@@ -19,7 +19,7 @@ async function processLine(line, headers) {
 
 async function runETL() {
     try {
-        console.log("🚀 Starting ETL Pipeline...");
+        console.log("Starting ETL Pipeline...");
         await client.connect();
 
         const csvPath = path.join(__dirname, 'superstore_sample.csv');
@@ -93,13 +93,13 @@ async function runETL() {
                 count++;
             } catch (err) {
                 await client.query('ROLLBACK');
-                console.error(`❌ Failed processing row ${count + 1}:`, err.message);
+                console.error(`Failed processing row ${count + 1}:`, err.message);
             }
         }
 
-        console.log(`✅ ETL Completed! Processed ${count} records.`);
+        console.log(`ETL Completed! Processed ${count} records.`);
     } catch (err) {
-        console.error("🔥 ETL Fatal Error:", err);
+        console.error("ETL Fatal Error:", err);
     } finally {
         await client.end();
     }

@@ -19,7 +19,7 @@ async function runSql() {
         await client.connect();
         const sql = fs.readFileSync(sqlFile, 'utf8');
         
-        console.log(`📜 Executing ${path.basename(sqlFile)}...`);
+        console.log(`Executing ${path.basename(sqlFile)}...`);
         
         // Split by semicolon, but handle the function body (which contains semicolons)
         // Simple split might break Stored Procedures. 
@@ -43,11 +43,11 @@ async function runSql() {
         } else {
             // Run as single block for Views/Procedures
             await client.query(sql);
-            console.log("✅ Executed successfully.");
+            console.log("Executed successfully.");
         }
 
     } catch (err) {
-        console.error("❌ SQL Error:", err.message);
+        console.error("SQL Error:", err.message);
     } finally {
         await client.end();
     }

@@ -10,7 +10,7 @@ const client = new Client({
 async function initDB() {
     try {
         await client.connect();
-        console.log("🔌 Connected to database...");
+        console.log("Connected to database...");
 
         // Read Schema Files
         const schemaPath = path.join(__dirname, '../database/superstore_schema.sql');
@@ -19,16 +19,16 @@ async function initDB() {
         const schemaSql = fs.readFileSync(schemaPath, 'utf8');
         const seedSql = fs.readFileSync(seedPath, 'utf8');
 
-        console.log("⚙️ Applying Schema...");
+        console.log("Applying Schema...");
         await client.query(schemaSql);
-        console.log("✅ Schema Applied.");
+        console.log("Schema Applied.");
 
-        console.log("🌱 Seeding Data...");
+        console.log("Seeding Data...");
         await client.query(seedSql);
-        console.log("✅ Data Seeded.");
+        console.log("Data Seeded.");
 
     } catch (err) {
-        console.error("❌ Error initializing DB:", err.message);
+        console.error("Error initializing DB:", err.message);
     } finally {
         await client.end();
     }

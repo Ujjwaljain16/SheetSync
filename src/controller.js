@@ -122,7 +122,7 @@ const processBatch = async (req, res) => {
         // Send Success Notification
         if (results.rows_success > 0) {
             const { sendNotification } = require('./services/notification');
-            sendNotification(`🚀 **Sync Success!**\nProcessed ${results.rows_received} rows.\n✅ Inserted/Updated: ${results.rows_success}\n❌ Failed: ${results.rows_failed.length}`, 'success');
+            sendNotification(`Sync Success! Processed ${results.rows_received} rows. Inserted/Updated: ${results.rows_success} Failed: ${results.rows_failed.length}`, 'success');
         }
         
         res.json(results);
@@ -133,7 +133,7 @@ const processBatch = async (req, res) => {
         
         // Send Error Notification
         const { sendNotification } = require('./services/notification');
-        sendNotification(`🚨 **Sync Critical Failure**\nError: ${error.message}`, 'error');
+        sendNotification(`Sync Critical Failure: ${error.message}`, 'error');
 
         res.status(500).json({ error: 'Internal Server Error: ' + error.message });
     } finally {
