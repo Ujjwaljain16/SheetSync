@@ -9,14 +9,14 @@ const client = new Client({
 
 async function importReturns() {
     try {
-        console.log("🚀 Starting Returns ETL...");
+        console.log("[INFO] Starting Returns ETL...");
         await client.connect();
 
         // 1. EXTRACT
         const jsonPath = path.join(__dirname, 'returns.json');
         const rawData = fs.readFileSync(jsonPath, 'utf8');
         const returns = JSON.parse(rawData);
-        console.log(`📦 Extracted ${returns.length} records.`);
+        console.log(`[INFO] Extracted ${returns.length} records.`);
 
         // 2. TRANSFORM
         const seenOrders = new Set();
@@ -27,13 +27,13 @@ async function importReturns() {
             
             // Validation: Skip if no Order ID
             if (!orderId || orderId.startsWith("INVALID")) {
-                console.warn(`⚠️ Skipping Invalid ID: ${orderId}`);
+                console.warn(`[WARN] Skipping Invalid ID: ${orderId}`);
                 continue;
             }
 
             // Deduplication
             if (seenOrders.has(orderId)) {
-                console.warn(`♻️ Duplicate removed: ${orderId}`);
+                console.warn(`[INFO] Duplicate removed: ${orderId}`);
                 continue;
             }
             seenOrders.add(orderId);
@@ -47,7 +47,7 @@ async function importReturns() {
                 reason: reason
             });
         }
-        console.log(`✨ Transformed to ${cleanData.length} clean records.`);
+        console.log(`[INFO] Transformed to ${cleanData.length} clean records.`);
 
         // 3. LOAD (Batch Insert)
         // Simple loop for this small dataset, but prepared statements for security
@@ -57,10 +57,10 @@ async function importReturns() {
                 [row.order_id, row.returned, row.reason]
             );
         }
-        console.log("✅ Load Complete!");
+        console.log("[SUCCESS] Load Complete!");
 
     } catch (err) {
-        console.error("🔥 ETL Error:", err);
+        console.error("[ERROR] ETL Error:", err);
     } finally {
         await client.end();
     }
