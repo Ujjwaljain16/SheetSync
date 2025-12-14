@@ -9,8 +9,12 @@ const authenticate = (req, res, next) => {
         return next();
     }
 
-    if (!apiKey || apiKey !== validApiKey) {
-        return res.status(401).json({ error: 'Unauthorized: Invalid or missing API Key' });
+    if (!apiKey) {
+        return res.status(401).json({ error: 'Unauthorized: Missing API Key' });
+    }
+
+    if (apiKey !== validApiKey) {
+        return res.status(403).json({ error: 'Forbidden: Invalid API Key' });
     }
 
     next();

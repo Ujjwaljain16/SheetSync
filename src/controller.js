@@ -40,9 +40,18 @@ const processBatch = async (req, res) => {
 
         // 1. Deduplicate rows by email (Last Write Wins within the batch)
         rows.forEach((row, index) => {
-             if (row.email) {
-                 uniqueRowsMap.set(row.email, { row, index });
+             // Immediate validation for missing identifier
+             if (!row.email) {
+                 results.rows_failed.push({
+                     row_number: index + 1,
+                     error: 'Missing required field: email',
+                     data: row
+                 });
+                 return;
              }
+             
+             // Deduplicate
+             uniqueRowsMap.set(row.email, { row, index });
         });
 
         // 2. Process unique rows
@@ -130,10 +139,6 @@ const processBatch = async (req, res) => {
     } finally {
         client.release();
     }
-};
-
-module.exports = {
-    processBatch
 };
 
 module.exports = {
