@@ -19,6 +19,51 @@ function runStep(stepName, command) {
     }
 }
 
+// Removed pg import as we use docker exec
+
+async function verifyInDatabase(orderId, expectedSales) {
+    console.log(`\n[VERIFY] Checking Database for Order: ${orderId}...`);
+    // Note: The system stores Sheet syncs in the 'employees' table with order details in 'metadata'
+    // We use docker-compose exec to strictly verify the container's database, avoiding local port/auth conflicts.
+    
+    try {
+        // Query for the specific email used in the test
+        const cmd = `docker-compose exec -T db psql -U postgres -d sheetsync -t -c "SELECT metadata FROM employees WHERE email='demo.user@example.com'"`;
+        const output = execSync(cmd, { encoding: 'utf8' }).trim();
+        
+        if (!output) {
+            console.error("   [FAIL] Row NOT found in 'employees' table! (Looked for email: demo.user@example.com)");
+            return false;
+        }
+
+        // Parse the JSON output from Postgres
+        let metadata;
+        try {
+            metadata = JSON.parse(output);
+        } catch (e) {
+             console.error("   [FAIL] Could not parse metadata JSON:", output);
+             return false;
+        }
+        
+        // Verify Order ID matches
+        const foundOrderId = metadata.order_id;
+        const foundSales = Number(metadata.sales);
+        
+        if (foundOrderId === orderId) {
+             console.log(`   [SUCCESS] Found Order ID '${orderId}' in metadata.`);
+             console.log(`   [SUCCESS] Verified Sales Amount: ${foundSales}`);
+             return true; 
+        } else {
+            console.error(`   [FAIL] Order ID mismatch in metadata. Expected: ${orderId}, Found: ${foundOrderId}`);
+            return false;
+        }
+
+    } catch (err) {
+        console.error("   [ERROR] Verification command failed:", err.message);
+        return false;
+    }
+}
+
 async function runDemo() {
     console.log("==================================================");
     console.log("       SHEETSYNC E2E DEMONSTRATION                ");
@@ -28,9 +73,6 @@ async function runDemo() {
     try {
         console.log("\n[CHECK] Verifying Server Status...");
         await axios.get('http://localhost:3000/'); 
-        // Assuming root might not return 200 if not defined, but connection refused is the real check.
-        // Actually our app generally doesn't have a root route defined in previous context, 
-        // but let's assume if it connects it's up.
         console.log("[SUCCESS] Server is Online.");
     } catch (error) {
         if (error.code === 'ECONNREFUSED') {
@@ -38,7 +80,6 @@ async function runDemo() {
             console.error("Please open a new terminal and run: npm start");
             process.exit(1);
         }
-        // Other errors (404) mean server is up but route missing, which is fine.
         console.log("[SUCCESS] Server is Online (Verified connection).");
     }
 
@@ -70,17 +111,20 @@ async function runDemo() {
         }
     }
     
+    const testOrderId = `DEMO-${Date.now()}`;
+    const testSales = 500.00;
+
     const demoPayload = {
         source: 'e2e_demo_script',
         sync_id: `demo_${Date.now()}`,
         rows: [
             {
                 // A valid row
-                order_id: `DEMO-${Date.now()}`,
+                order_id: testOrderId,
                 order_date: new Date().toISOString().split('T')[0],
                 full_name: "Demo User",
                 email: "demo.user@example.com",
-                sales: 500.00,
+                sales: testSales,
                 quantity: 2,
                 profit: 50.00,
                 status: "ACTIVE" // Valid status per CHECK constraint
@@ -105,9 +149,15 @@ async function runDemo() {
         console.log(JSON.stringify(response.data, null, 2));
 
         if (response.data.rows_success === 1 && response.data.rows_failed.length === 1) {
-             console.log("\n[SUCCESS] API Logic Verified:");
-             console.log("   - 1 Row Inserted (Valid)");
-             console.log("   - 1 Row Rejected (Invalid - as expected)");
+             console.log("\n[SUCCESS] API Logic Verified: 1 Valid, 1 Invalid.");
+             
+             // 7. Verify in Database
+             const dbSuccess = await verifyInDatabase(testOrderId, testSales);
+             if (!dbSuccess) {
+                 console.error("\n[FAIL] E2E Verification Failed at Database Level.");
+                 process.exit(1);
+             }
+
         } else {
              console.log("\n[WARN] API Response differed from expectation.");
         }
