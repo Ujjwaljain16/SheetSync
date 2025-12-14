@@ -1,0 +1,51 @@
+
+> sheetsync@1.0.0 test
+> jest
+
+  console.log
+    [dotenv@17.2.3] injecting env (3) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+FAIL tests/api.test.js
+  SheetSync E2E API Tests
+    Authentication
+      √ should return 401 if API Key is missing (25 ms)
+      √ should return 403 if API Key is invalid (5 ms)
+    Input Validation
+      √ should return 400 for empty payload (4 ms)
+      √ should return 400 for non-array rows (3 ms)
+    Batch Processing
+      √ should process a valid batch successfully (4 ms)
+      √ should handle partial failures (missing fields) (4 ms)
+      √ should deduplicate emails within the same batch (4 ms)
+    System Resilience
+      × should rollback transaction on database failure (2 ms)
+
+  ● SheetSync E2E API Tests › System Resilience › should rollback transaction on database failure
+
+    ReferenceError: validRow is not defined
+
+    [0m [90m 125 |[39m                 [33m.[39mpost([32m'/sheetsync/batch'[39m)
+     [90m 126 |[39m                 [33m.[39m[36mset[39m([32m'x-api-key'[39m[33m,[39m [32m'test-secret'[39m)
+    [31m[1m>[22m[39m[90m 127 |[39m                 [33m.[39msend({ rows[33m:[39m [validRow] })[33m;[39m
+     [90m     |[39m                                [31m[1m^[22m[39m
+     [90m 128 |[39m
+     [90m 129 |[39m             expect(res[33m.[39mstatusCode)[33m.[39mtoEqual([35m500[39m)[33m;[39m
+     [90m 130 |[39m             expect(res[33m.[39mbody[33m.[39merror)[33m.[39mtoContain([32m'DB Connection Lost'[39m)[33m;[39m[0m
+
+      at Object.validRow (tests/api.test.js:127:32)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 7 passed, 8 total
+Snapshots:   0 total
+Time:        0.447 s, estimated 1 s
+Ran all test suites.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.
