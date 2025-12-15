@@ -78,9 +78,6 @@ function onEdit(e) {
 
 ## 🎬 Live Demonstration
 
-### Auto-Registration in Action
-![Auto-registration demo](docs/assets/demo.gif)
-
 **Try it yourself:**
 1. **Open Demo Sheet**: [Google Sheet Template](https://docs.google.com/spreadsheets/d/1OGygre5bplHhkAfBgcHbifE_444odtU0qeJP9AnQ9m8/edit?usp=sharing)
 2. **Add a test row**: 
@@ -95,15 +92,6 @@ function onEdit(e) {
      docker exec -it sheetsync-db psql -U postgres -d sheetsync \
        -c "SELECT * FROM orders WHERE order_id = 'Order-2024-TEST';"
      ```
-
-### Database Schema Visualization
-![ER Diagram](docs/assets/er_diagram.png)
-*Full 3NF normalization with indexed foreign keys*
-
-### Performance Benchmarks
-![Query Performance](docs/assets/performance_chart.png)
-*Materialized views deliver sub-millisecond response times*
-
 ---
 
 ## 📊 Datasets Processed (Task 7)
