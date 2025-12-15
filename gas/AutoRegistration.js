@@ -47,7 +47,7 @@ function autoRegistration() {
     const status = String(statusValues[i][0] || "");
 
     // Skip if already processed
-    if (status === "Synced" || status.startsWith("Error")) { 
+    if (status === "Synced" || (status.startsWith && status.startsWith("Error"))) { 
       continue; 
     }
 
@@ -169,7 +169,17 @@ function sendBatchToApi(payload) {
  * Sends Email Notification for Invalid Entries
  */
 function sendNotification(rowNum, errorMsg, rowData) {
-  const email = Session.getActiveUser().getEmail() || CONFIG.EMAIL_RECIPIENT;
+  let email = CONFIG.EMAIL_RECIPIENT;
+  try {
+    // Session.getActiveUser() fails in time-based triggers
+    const user = Session.getActiveUser().getEmail();
+    if (user) {
+      email = user;
+    }
+  } catch (e) {
+    Logger.log("Could not get active user (expected in triggers): " + e.toString());
+  }
+
   const subject = "Auto-Registration Failed: Row " + rowNum;
   const body = `
     SheetSync Alert
